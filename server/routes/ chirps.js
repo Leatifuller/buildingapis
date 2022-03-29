@@ -1,48 +1,42 @@
 const express = require('express');
-const chirpstore = require('../chirpstore');
-
+const chirpstore = require('../chirpstore.js');
 const router = express.Router();
 
-router.get('/id', (req, res)=> {
-    if (req.params.id) {
-     const chirps = chirpstore.GetChirp(req.params.id);  
-     res.send(chirps) 
-    } else {
+// REST API
+router.get("/:id?", (req, res) => {
+    const id = req.params.id;
 
-        const chirps = chirpstore.GetChirps();
-        delete chirps.nextid;
-        const tempArr = Object.entries(chirps)
-        console.log(tempArr); 
-        const chirpArr = tempArr.map(chirp => {
-            const newChirp = {
-                id: chirp[0],
-                name: chirp[1].name,
-                chirp: chirp[1].Chirp,
-            }
-            return newChirp
-        })
-        chirpArr.reverse()
-        res.send(chirpArr);
+    if (id) {
+        const chirp = chirpsStore.GetChirp(id);
+        res.json(chirp);
+    } else {
+        const chirps = chirpsStore.GetChirps();
+        res.json(chirps);
     }
 });
 
-router.post('/', (req, res) =>{
-    console.log(req.body)
-    chirpstore.CreateChirp(req.body)
-    res.send(200)
+// Create
+router.post("/", (req, res) => {
+    const body = req.body;
+
+    chirpsStore.CreateChirp(body);
+    res.sendStatus(200);
 });
 
-router.delete('/:id',(req, res) =>{
-    chirpstore.DeleteChirp(req.params.id)
-    res.send(200)
-});
-
-router.put('/:id', (req, res)=> {
+// Delete
+router.delete("/:id", (req, res) => {
     const id = req.params.id;
-    const chirp = req.body;
-    chirpstore.UpdateChirp(id, chirp);
-    res.send(200);
+    chirpsStore.DeleteChirp(id);
+    res.sendStatus(200);
 });
 
+// Update
+router.put("/:id", (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+
+    chirpsStore.UpdateChirp(id, body);
+    res.sendStatus(200);
+});
 
 module.exports = router;
